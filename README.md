@@ -47,13 +47,19 @@ Three.js 0.160.1、OrbitControls、GLTFLoaderをCDNから読み込みます。CD
 - 昼夜サイクル、雨、ミニマップ、建物のInstancedMesh描画。
 - localStorageによる自動保存と、セーブJSONの書き出し・読み込み。
 
-街路と敷地は神保町を参考に縮約した創作地図です。店名・人物・物語は架空です。
+街路は実際の神保町の位置関係を参考に、徒歩で遊べる広さへ縮約しています。靖国通りと白山通りの交差点、南側のすずらん通り・さくら通り、北東の錦華通り・明大通り、神田警察通りを配置しています。
+
+地下鉄入口、古書棚のある店先、すずらん形の街灯、喫茶店の路地、錦華公園・西神田公園、出版社や大学街をイメージした建物を追加しています。ミニマップと3Dは同じ街路・敷地データを使います。
+
+道幅・距離・建物・地下鉄入口はゲーム向けの簡略表現で、現況の精密な再現や道案内用の地図ではありません。遊べる店舗・人物・物語は架空です。参照した2020年の散歩地図に掲載された各店舗の営業状況を再現するものではありません。
 
 ## 保存
 
 行動時とプレイ時間10秒ごとに自動保存します。保存枠は1つです。ブラウザの設定やローカルファイルの保存先によってはlocalStorageが利用できない、または保存内容が引き継がれない場合があります。
 
 ファイルを移動する前や別のブラウザへ移る前は「設定・データ」からセーブを書き出してください。旧配置のHTMLで保存していた場合、移動後に「つづきから」が表示されないことがあります。
+
+旧マップのセーブは蔵書・所持金・クエスト進行を引き継ぎ、初回のみ神保町交差点へ戻ります。
 
 ## PLATEAUへの差し替え
 
@@ -90,12 +96,18 @@ jimbocho-rpg/
   README.md
   .gitattributes
   .gitignore
+  scripts/check-map.cjs
 ```
 
-制作時には、DOMを模擬したロジック検証18項目（全地点への到達、物語完走、売買、交渉、保存、通信失敗時の2D継続など）を実行しています。実ブラウザでの描画確認と実機60fpsの測定は未実施です。
+制作時には、DOMを模擬したロジック検証18項目（全地点への到達、物語完走、売買、交渉、保存、通信失敗時の2D継続など）を実行しています。
+
+マップ更新時は `node scripts/check-map.cjs` で構文、全19地点への徒歩経路、全16街路の通行、旧・新セーブの読み込みを確認できます。公開版ではゲーム開始と3D描画も確認しています。実機60fpsの測定は未実施です。
 
 ## 参考資料
 
+- [千代田区：神保町地域のまちづくり方針](https://www.city.chiyoda.lg.jp/koho/machizukuri/toshi/kekaku/masterplan/jinbocho.html)
+- [おさんぽ神保町MAP（2020年版・三省堂書店掲載PDF）](https://www.books-sanseido.co.jp/jimbocho/pdf/osanpo_map.pdf)
+- [神田すずらん通り商店街](https://kanda-suzuran.jp/)
 - [Three.js GLTFLoader](https://threejs.org/docs/pages/GLTFLoader.html)
 - [PLATEAU GIS Converterの解説](https://www.mlit.go.jp/plateau/learning/tpc30/)
 - [日本の古本屋：古本まつりの季節](https://www.kosho.or.jp/special_topic/detail.php?topic_id=198)
