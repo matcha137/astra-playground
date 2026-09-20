@@ -192,18 +192,18 @@ function buildTownScene(T,base,buildings,details,instance,mat){
   for(const [x,z,x2,z2,w,name]of ROADS){
     const length=Math.hypot(x2-x,z2-z),angle=Math.atan2(x2-x,z2-z),pedestrian=w<=7;
     pavements.push([(x+x2)/2,.045,(z+z2)/2,w+5,.10,length+2,0xd2cbbb,angle]);
-    asphalt.push([(x+x2)/2,.105,(z+z2)/2,w,.04,length,pedestrian?0xb8ac95:0x566065,angle]);
+    asphalt.push([(x+x2)/2,pedestrian?.105:.145,(z+z2)/2,w,.04,length,pedestrian?0xb8ac95:0x566065,angle]);
     if(pedestrian&&name.includes('通り')){
       const dx=(x2-x)/length,dz=(z2-z)/length;
-      for(let t=2;t<length;t+=4)blocks.push([x+dx*t,.133,z+dz*t,w,.012,.12,0xe0d4bb,angle]);
+      for(let t=2;t<length;t+=4)if(!ROADS.some(r=>r[4]>7&&roadDistance(x+dx*t,z+dz*t,r)<r[4]/2+1))blocks.push([x+dx*t,.133,z+dz*t,w,.012,.12,0xe0d4bb,angle]);
     }
   }
   instance(pavements,mat,base);instance(asphalt,mat,base);
-  for(let x=-138;x<145;x+=8)if(Math.abs(x)>20&&Math.abs(x-118)>14)blocks.push([x,.14,0,4,.025,.16,0xe5dec9]);
-  for(let z=-100;z<105;z+=8)if(Math.abs(z)>20)blocks.push([0,.14,z,.16,.025,4,0xe5dec9]);
+  for(let x=-138;x<145;x+=8)if(Math.abs(x)>20&&Math.abs(x-118)>14)blocks.push([x,.19,0,4,.025,.16,0xe5dec9]);
+  for(let z=-100;z<105;z+=8)if(Math.abs(z)>20)blocks.push([0,.19,z,.16,.025,4,0xe5dec9]);
   for(const [cx,cz]of [[0,0],[118,0]])for(let i=-4;i<=4;i++)for(const side of [-1,1]){
-    blocks.push([cx+i*1.7,.15,cz+side*13,1,.025,4,0xf2edda]);
-    blocks.push([cx+side*14,.15,cz+i*1.7,4,.025,1,0xf2edda]);
+    blocks.push([cx+i*1.7,.19,cz+side*13,1,.025,4,0xf2edda]);
+    blocks.push([cx+side*14,.19,cz+i*1.7,4,.025,1,0xf2edda]);
   }
   FOOTPRINTS.forEach(([x,z,w,d,h,color],i)=>{
     bodies.push([x,h/2+.13,z,w,h,d,color??palette[i%palette.length]]);
@@ -251,7 +251,7 @@ function buildTownScene(T,base,buildings,details,instance,mat){
   }
   for(const p of places){
     if(!p.side)continue;
-    const [,z,side,w]=SHOP_SITES[p.id],face=z+side*2.92,angle=side>0?Math.PI:0,color=p.type==='book'?0x34594f:p.type==='curry'?0x934633:0x5a5147;
+    const [,z,side,w]=SHOP_SITES[p.id],face=z+side*2.72,angle=side>0?Math.PI:0,color=p.type==='book'?0x34594f:p.type==='curry'?0x934633:0x5a5147;
     const window=new T.Mesh(new T.PlaneGeometry(w*.75,2.65),textures[p.type]);window.position.set(p.x,1.95,face);window.rotation.y=angle;buildings.add(window);
     panel(p.name,p.x,4.45,face,w*.96,1.2,{angle,bg:p.type==='curry'?'#894a35':'#e4d7b7',ink:p.type==='curry'?'#fff0d2':'#2e3b2e',parent:buildings});
     shopProps.push([p.x,3.4,z+side*2.2,w+.35,.18,1.9,color]);
@@ -314,7 +314,7 @@ function buildTownScene(T,base,buildings,details,instance,mat){
   const dummy=new T.Object3D();treePoints.forEach(([x,z,r],i)=>{dummy.position.set(x,3.5,z);dummy.scale.set(r,r*1.35,r);dummy.updateMatrix();leaves.setMatrixAt(i,dummy.matrix);leaves.setColorAt(i,new T.Color([0x647c50,0x80945e,0x587457][i%3]));});leaves.instanceMatrix.needsUpdate=true;details.add(leaves);
   const lamps=new T.InstancedMesh(new T.SphereGeometry(1,8,6),new T.MeshBasicMaterial({color:0xffefc7}),bulbs.length);
   bulbs.forEach(([x,y,z,sx,sy,sz],i)=>{dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.updateMatrix();lamps.setMatrixAt(i,dummy.matrix);});lamps.instanceMatrix.needsUpdate=true;details.add(lamps);
-  for(const [text,x,z,angle]of MAP_LABELS.slice(0,7))panel(text,x,.165,z,text.length*1.35,2.5,{bg:null,ink:'#f6edda',ground:true,angle:-angle});
+  for(const [text,x,z,angle]of MAP_LABELS.slice(0,7))panel(text,x,.20,z,text.length*1.35,2.5,{bg:null,ink:'#f6edda',ground:true,angle:-angle});
   return winMat;
 }
 // Model faces +Z. Joint pivots keep the hands, sleeves and shoes connected while walking.
@@ -412,7 +412,7 @@ function createPlayer(T){
     bag.rotation.x=Math.sin(phase+.5)*.08*motion;bag.rotation.z=Math.sin(phase)*.04*motion;
   }};
 }
-async function init3D(){const version=++bootVersion;const timeout=setTimeout(()=>{$('status').textContent='CDN待機中：内蔵2Dで全編プレイできます'},7000);try{const [T,{OrbitControls},{GLTFLoader}]=await Promise.all([import('three'),import('three/addons/controls/OrbitControls.js'),import('three/addons/loaders/GLTFLoader.js')]);if(version!==bootVersion)return;clearTimeout(timeout);const scene=new T.Scene(),renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;renderer.domElement.id='three';renderer.domElement.className='scene';document.body.prepend(renderer.domElement);const camera=new T.PerspectiveCamera(48,innerWidth/innerHeight,.5,520);camera.position.set(game.x,36,game.z+43);const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(game.x,0,game.z);controls.enablePan=false;controls.enableDamping=true;controls.minDistance=28;controls.maxDistance=90;controls.minPolarAngle=.25;controls.maxPolarAngle=1.05;const ambient=new T.HemisphereLight(0xe5edf2,0x5f6359,2);scene.add(ambient);const sun=new T.DirectionalLight(0xffecd5,2.7);sun.position.set(-65,80,35);scene.add(sun);scene.fog=new T.FogExp2(0xc8b899,.0026);const base=new T.Group(),buildings=new T.Group(),details=new T.Group();scene.add(base,buildings,details);const box=new T.BoxGeometry(1,1,1),mat=new T.MeshStandardMaterial({roughness:.9});const dummy=new T.Object3D();function instance(items,material,parent){const mesh=new T.InstancedMesh(box,material,items.length);items.forEach((o,i)=>{dummy.position.set(o[0],o[1],o[2]);dummy.scale.set(o[3],o[4],o[5]);dummy.rotation.set(0,o[7]||0,0);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);mesh.setColorAt(i,new T.Color(o[6]))});mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();parent.add(mesh);return mesh}const winMat=buildTownScene(T,base,buildings,details,instance,mat);
+async function init3D(){const version=++bootVersion;const timeout=setTimeout(()=>{$('status').textContent='CDN待機中：内蔵2Dで全編プレイできます'},7000);try{const [T,{OrbitControls},{GLTFLoader}]=await Promise.all([import('three'),import('three/addons/controls/OrbitControls.js'),import('three/addons/loaders/GLTFLoader.js')]);if(version!==bootVersion)return;clearTimeout(timeout);const scene=new T.Scene(),renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;renderer.domElement.id='three';renderer.domElement.className='scene';document.body.prepend(renderer.domElement);const camera=new T.PerspectiveCamera(48,innerWidth/innerHeight,.5,520);camera.position.set(game.x-24,36,game.z-43);const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(game.x,0,game.z);controls.enablePan=false;controls.enableDamping=true;controls.minDistance=28;controls.maxDistance=90;controls.minPolarAngle=.25;controls.maxPolarAngle=1.05;const ambient=new T.HemisphereLight(0xe5edf2,0x5f6359,2);scene.add(ambient);const sun=new T.DirectionalLight(0xffecd5,2.7);sun.position.set(-65,80,35);scene.add(sun);scene.fog=new T.FogExp2(0xc8b899,.0026);const base=new T.Group(),buildings=new T.Group(),details=new T.Group();scene.add(base,buildings,details);const box=new T.BoxGeometry(1,1,1),mat=new T.MeshStandardMaterial({roughness:.9});const dummy=new T.Object3D();function instance(items,material,parent){const mesh=new T.InstancedMesh(box,material,items.length);items.forEach((o,i)=>{dummy.position.set(o[0],o[1],o[2]);dummy.scale.set(o[3],o[4],o[5]);dummy.rotation.set(0,o[7]||0,0);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);mesh.setColorAt(i,new T.Color(o[6]))});mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();parent.add(mesh);return mesh}const winMat=buildTownScene(T,base,buildings,details,instance,mat);
 for(const p of places){const color=p.type==='book'?0x35564c:p.type==='curry'?0xa35536:0x665578;const body=new T.Mesh(new T.CapsuleGeometry(.45,1.05,3,6),new T.MeshStandardMaterial({color}));body.position.set(p.x,1.25,p.z);details.add(body);const head=new T.Mesh(new T.SphereGeometry(.38,8,6),new T.MeshStandardMaterial({color:0xd8b78b}));head.position.set(p.x,2.25,p.z);details.add(head);}
 const avatar=createPlayer(T),player=avatar.root;scene.add(player);const ring=new T.Mesh(new T.TorusGeometry(2,.13,6,36),new T.MeshBasicMaterial({color:0xe9b66c}));ring.rotation.x=-Math.PI/2;scene.add(ring);const rainCount=650,rainArray=new Float32Array(rainCount*6);for(let i=0;i<rainCount;i++){const j=i*6;rainArray[j]=(Math.random()-.5)*140;rainArray[j+1]=Math.random()*55;rainArray[j+2]=(Math.random()-.5)*140;rainArray[j+3]=rainArray[j]-.3;rainArray[j+4]=rainArray[j+1]+1.7;rainArray[j+5]=rainArray[j+2]}const rainGeo=new T.BufferGeometry();rainGeo.setAttribute('position',new T.BufferAttribute(rainArray,3));const rain=new T.LineSegments(rainGeo,new T.LineBasicMaterial({color:0xbbc8c4,transparent:true,opacity:.5}));rain.frustumCulled=false;scene.add(rain);let prevX=game.x,prevZ=game.z,plateauGroup=null,loadId=0;
 function dispose(group){group.traverse(o=>{o.geometry?.dispose();for(const m of o.material?(Array.isArray(o.material)?o.material:[o.material]):[]){for(const v of Object.values(m))if(v?.isTexture)v.dispose();m.dispose()}})}
