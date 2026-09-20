@@ -5,6 +5,8 @@ GPT6 Astraにつくらせたものです。
 
 ## 起動
 
+[GitHub Pagesでプレイする](https://matcha137.github.io/astra-playground/)
+
 `jimbocho-rpg.html` をダブルクリックし、ブラウザで開いてください。
 
 Three.js 0.160.1、OrbitControls、GLTFLoaderをCDNから読み込みます。CDNやWebGLを利用できない場合は内蔵2Dモードへ切り替わり、同じ物語・収集・売買を最後まで遊べます。PLATEAUデータの読み込みは任意で、標準では内蔵データから街区を生成します。
@@ -78,9 +80,13 @@ Three.js 0.160.1、OrbitControls、GLTFLoaderをCDNから読み込みます。CD
 
 ## 構成と検証状況
 
+GitHub Pagesは`main`ブランチのルートから公開します。`index.html`からゲーム本体へ移動し、`main`へのプッシュで公開内容を更新します。
+
 ```text
 jimbocho-rpg/
+  index.html
   jimbocho-rpg.html
+  .nojekyll
   README.md
   .gitattributes
   .gitignore
